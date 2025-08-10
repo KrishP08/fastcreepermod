@@ -4,6 +4,8 @@
   "package": "org.fastcreepermod.fastcreepermod.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "CreeperEntityMixin",
+    "CreeperEntityAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

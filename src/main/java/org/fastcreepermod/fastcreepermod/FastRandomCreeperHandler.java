@@ -4,66 +4,49 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import org.fastcreepermod.fastcreepermod.mixin.CreeperEntityAccessor;
 
-import java.util.List;
 import java.util.Random;
 
 public class FastRandomCreeperHandler {
     private static final Random random = new Random();
     private static int tickCounter = 0;
     private static int waveMultiplier = 1;
-    private static final double FAST_SPEED = 0.95D;
-    private static final double EXTRA_HEALTH = 60.0D; // default was 20HP
+    private static final double FAST_SPEED = 0.45D;
+    private static final double EXTRA_HEALTH = 60.0D;
 
     public static void registerEvents() {
+        // Buff normal creepers on spawn
         ServerEntityEvents.ENTITY_LOAD.register((entity, world) -> {
             if (entity instanceof CreeperEntity creeper && world instanceof ServerWorld serverWorld) {
                 if (!serverWorld.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER).get()) return;
-
-                creeper.getAttributeInstance(EntityAttributes.MOVEMENT_SPEED).setBaseValue(FAST_SPEED);
-                creeper.getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(EXTRA_HEALTH);
-                creeper.setHealth((float) EXTRA_HEALTH);
-
-                PlayerEntity nearest = serverWorld.getClosestPlayer(creeper, 20);
-                if (nearest != null && nearest.isCreative()) {
-                    creeper.setFuseSpeed(0);
-                    creeper.extinguish();
-                } else if (nearest != null) {
-                    double dist = creeper.distanceTo(nearest);
-                    int fuseSpeed = dist < 5 ? Math.max(1, 5 - (int) dist) : 0;
-                    creeper.setFuseSpeed(fuseSpeed);
-                    creeper.setTarget(nearest);
-                }
+                baseCreeperBuff(serverWorld, creeper);
             }
         });
 
+        // Wave spawn
         ServerTickEvents.END_WORLD_TICK.register(FastRandomCreeperHandler::spawnCreeperWave);
 
+        // Proximity fuse trigger
         ServerTickEvents.END_WORLD_TICK.register(world -> {
-            if (!(world instanceof ServerWorld serverWorld)) return;
-            if (!serverWorld.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER).get()) return;
+            if (!(world instanceof ServerWorld sw)) return;
+            if (!sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER).get()) return;
 
-            for (CreeperEntity creeper : serverWorld.getEntitiesByClass(
-                    CreeperEntity.class,
-                    new Box(-30000, -300, -30000, 30000, 300, 30000),
-                    c -> true)) {
-                PlayerEntity nearest = serverWorld.getClosestPlayer(creeper, 12);
+            for (CreeperEntity creeper : sw.getEntitiesByClass(CreeperEntity.class, new Box(-300, -300, -300, 300, 300, 300), c -> true)) {
+                PlayerEntity nearest = sw.getClosestPlayer(creeper, 6);
                 if (nearest != null && !nearest.isCreative()) {
-                    double dist = creeper.distanceTo(nearest);
-                    if (dist < 6 && creeper.getFuseSpeed() <= 0) {
-                        int fuseSpeed = Math.max(1, 4 - (int) (dist / 2));
-                        creeper.setFuseSpeed(fuseSpeed);
-                    }
+                    creeper.setFuseSpeed(10);
                     creeper.setTarget(nearest);
-                } else {
-                    creeper.setFuseSpeed(0);
-                    creeper.extinguish();
                 }
             }
         });
@@ -75,20 +58,17 @@ public class FastRandomCreeperHandler {
         tickCounter++;
         if (tickCounter % 6000 == 0 && waveMultiplier < 10) waveMultiplier++;
 
-        if (tickCounter >= 60) { // ~30s
+        if (tickCounter >= 100) { // every 0.5s
             tickCounter = 0;
-            int creepersPerPlayer = 3 * 4 * waveMultiplier;
+            int creepersPerPlayer = 2 * waveMultiplier;
             world.getPlayers().forEach(player -> {
                 if (player.isCreative()) return;
                 for (int i = 0; i < creepersPerPlayer; i++) {
-                    BlockPos pos = player.getBlockPos().add(random.nextInt(36) - 18, 0, random.nextInt(36) - 18);
-                    if (world.getLightLevel(pos) < 8 && world.isAir(pos)) {
+                    BlockPos pos = player.getBlockPos().add(random.nextInt(18) - 9, 0, random.nextInt(18) - 9);
+                    if (world.isAir(pos)) {
                         CreeperEntity creeper = new CreeperEntity(EntityType.CREEPER, world);
                         creeper.refreshPositionAndAngles(pos, 0, 0);
-                        creeper.getAttributeInstance(EntityAttributes.MOVEMENT_SPEED).setBaseValue(FAST_SPEED);
-                        creeper.getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(EXTRA_HEALTH);
-                        creeper.setHealth((float) EXTRA_HEALTH);
-                        creeper.setFuseSpeed(2);
+                        baseCreeperBuff(world, creeper);
                         creeper.setTarget(player);
                         world.spawnEntity(creeper);
                     }
@@ -97,19 +77,36 @@ public class FastRandomCreeperHandler {
         }
     }
 
-    public static void applyExplosionKnockback(ServerWorld world, BlockPos explosionPos, double radius, PlayerEntity player) {
-        List<CreeperEntity> creepers = world.getEntitiesByClass(
-                CreeperEntity.class, new Box(explosionPos).expand(radius), c -> true);
+    private static void baseCreeperBuff(ServerWorld world, CreeperEntity creeper) {
+        creeper.getAttributeInstance(EntityAttributes.MOVEMENT_SPEED).setBaseValue(FAST_SPEED);
+        creeper.getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(EXTRA_HEALTH);
+        creeper.setHealth((float) EXTRA_HEALTH);
+        creeper.setFuseSpeed(5);
 
-        for (CreeperEntity creeper : creepers) {
-            Vec3d dir = creeper.getPos().subtract(Vec3d.ofCenter(explosionPos)).normalize();
-            double up = 0.6;
-            if (player != null && player.getY() > creeper.getY()) {
-                up += (player.getY() - creeper.getY()) * 0.22;
-            }
-            Vec3d knockback = dir.multiply(2).add(0, up, 0);
-            creeper.addVelocity(knockback.x, knockback.y, knockback.z);
-            creeper.velocityModified = true;
+        if (world.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_CHARGED).get()) {
+            creeper.getDataTracker().set(CreeperEntityAccessor.getChargedData(), true);
+        } else if (random.nextFloat() < 0.3f) {
+            creeper.getDataTracker().set(CreeperEntityAccessor.getChargedData(), true);
+        }
+
+        if (world.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_ENDCRYSTAL).get()) {
+            creeper.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 200, 1, false, false));
+        } else if (world.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_CHARGED).get()) {
+            creeper.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 200, 0, false, false));
+        }
+    }
+
+    public static void doExplosionEffects(ServerWorld world, CreeperEntity creeper, float radius) {
+        BlockPos pos = creeper.getBlockPos();
+        if (world.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_ENDCRYSTAL).get()) {
+            world.spawnParticles(ParticleTypes.END_ROD, creeper.getX(), creeper.getY() + 1, creeper.getZ(), 60, 2, 2, 2, 0.05);
+            world.playSound(null, pos, SoundEvents.ENTITY_GENERIC_EXPLODE.value(), SoundCategory.HOSTILE, 2.0F, 1.0F);
+        } else if (world.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_CHARGED).get() || creeper.isCharged()) {
+            world.spawnParticles(ParticleTypes.ELECTRIC_SPARK, creeper.getX(), creeper.getY() + 0.5, creeper.getZ(), 50, 1.5, 1.5, 1.5, 0.05);
+            world.playSound(null, pos, SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.HOSTILE, 2.5F, 1.0F);
+        } else {
+            world.spawnParticles(ParticleTypes.EXPLOSION_EMITTER, creeper.getX(), creeper.getY(), creeper.getZ(), 20, 1, 1, 1, 0.0);
+            world.playSound(null, pos, SoundEvents.ENTITY_CREEPER_PRIMED, SoundCategory.HOSTILE, 1.5F, 1.0F);
         }
     }
 }

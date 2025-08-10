@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "fastcreepermod",
-  "version": "${version}",
+  "version": "0.2.0",
 
   "name": "fastcreepermod",
   "description": "Faster creepers, random fuse, wave spawns of short-fuse and charged creepers when enabled via gamerule.",
