@@ -2,31 +2,30 @@
   "schemaVersion": 1,
   "id": "fastcreepermod",
   "version": "${version}",
+
   "name": "fastcreepermod",
-  "description": "",
+  "description": "Faster creepers, random fuse, wave spawns of short-fuse and charged creepers when enabled via gamerule.",
   "authors": [],
   "contact": {},
+
   "license": "All-Rights-Reserved",
   "icon": "assets/fastcreepermod/icon.png",
+
   "environment": "*",
   "entrypoints": {
-    "fabric-datagen": [
-      "org.fastcreepermod.fastcreepermod.client.FastcreepermodDataGenerator"
-    ],
-    "client": [
-      "org.fastcreepermod.fastcreepermod.client.FastcreepermodClient"
-    ],
-    "main": [
-      "org.fastcreepermod.fastcreepermod.Fastcreepermod"
-    ]
+    "fabric-datagen": ["org.fastcreepermod.fastcreepermod.client.FastcreepermodDataGenerator"],
+    "client": ["org.fastcreepermod.fastcreepermod.client.FastcreepermodClient"],
+    "main": ["org.fastcreepermod.fastcreepermod.FastCreeperMod"]
   },
+
   "mixins": [
-    "fastcreepermod.mixins.json",
-    {
+    "fastcreepermod.mixins.json"
+    ,{
       "config": "fastcreepermod.client.mixins.json",
       "environment": "client"
     }
   ],
+
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
