@@ -14,6 +14,8 @@ public class FastCreeperMod implements ModInitializer {
     public void onInitialize() {
         ModGameRules.registerRules();
         FastRandomCreeperHandler.registerEvents();
+        ModRegistry.register();
+        BismithOreWorldGen.init();
 
         // Message to ops when server starts
         ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStart);
