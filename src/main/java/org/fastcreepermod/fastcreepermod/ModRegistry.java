@@ -1,10 +1,11 @@
 package org.fastcreepermod.fastcreepermod;
 
-import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
+import net.minecraft.registry.Registries; // <-- IMPORT THE NEW 'Registries' CLASS
+import net.minecraft.registry.Registry;   // <-- FIX THE IMPORT PATH FOR 'Registry'
+import net.minecraft.util.Identifier;
 
 public class ModRegistry {
     // Blocks
@@ -22,19 +23,20 @@ public class ModRegistry {
 
     public static void register() {
         // Register blocks and block items
-        Registry.register(Registry.BLOCK, new Identifier("fastcreepermod", "bismith_ore"), BISMITH_ORE);
-        Registry.register(Registry.ITEM, new Identifier("fastcreepermod", "bismith_ore"), new BlockItem(BISMITH_ORE, new Item.Settings()));
-        
-        Registry.register(Registry.BLOCK, new Identifier("fastcreepermod", "bismith_block"), BISMITH_BLOCK);
-        Registry.register(Registry.ITEM, new Identifier("fastcreepermod", "bismith_block"), new BlockItem(BISMITH_BLOCK, new Item.Settings()));
+        // Use Registries.BLOCK and Registries.ITEM instead of Registry.BLOCK/ITEM
+        Registry.register(Registries.BLOCK, new Identifier("fastcreepermod", "bismith_ore"), BISMITH_ORE);
+        Registry.register(Registries.ITEM, new Identifier("fastcreepermod", "bismith_ore"), new BlockItem(BISMITH_ORE, new Item.Settings()));
+
+        Registry.register(Registries.BLOCK, new Identifier("fastcreepermod", "bismith_block"), BISMITH_BLOCK);
+        Registry.register(Registries.ITEM, new Identifier("fastcreepermod", "bismith_block"), new BlockItem(BISMITH_BLOCK, new Item.Settings()));
 
         // Register standalone items
-        Registry.register(Registry.ITEM, new Identifier("fastcreepermod", "raw_bismith"), RAW_BISMITH);
-        Registry.register(Registry.ITEM, new Identifier("fastcreepermod", "bismith_ingot"), BISMITH_INGOT);
+        Registry.register(Registries.ITEM, new Identifier("fastcreepermod", "raw_bismith"), RAW_BISMITH);
+        Registry.register(Registries.ITEM, new Identifier("fastcreepermod", "bismith_ingot"), BISMITH_INGOT);
 
         // Register toggler items
-        Registry.register(Registry.ITEM, new Identifier("fastcreepermod", "fast_creeper_toggler"), FAST_CREEPER_TOGGLER);
-        Registry.register(Registry.ITEM, new Identifier("fastcreepermod", "charged_creeper_toggler"), CHARGED_CREEPER_TOGGLER);
-        Registry.register(Registry.ITEM, new Identifier("fastcreepermod", "end_crystal_toggler"), END_CRYSTAL_TOGGLER);
+        Registry.register(Registries.ITEM, new Identifier("fastcreepermod", "fast_creeper_toggler"), FAST_CREEPER_TOGGLER);
+        Registry.register(Registries.ITEM, new Identifier("fastcreepermod", "charged_creeper_toggler"), CHARGED_CREEPER_TOGGLER);
+        Registry.register(Registries.ITEM, new Identifier("fastcreepermod", "end_crystal_toggler"), END_CRYSTAL_TOGGLER);
     }
 }
