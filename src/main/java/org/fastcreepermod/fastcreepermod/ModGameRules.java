@@ -18,6 +18,6 @@ public class ModGameRules {
         );
         FAST_RANDOM_CREEPER_ENDCRYSTAL = GameRuleRegistry.register(
                 "fastRandomCreeperEndCrystal", GameRules.Category.MOBS, GameRuleFactory.createBooleanRule(false)
-        );
+        );//
     }
 }

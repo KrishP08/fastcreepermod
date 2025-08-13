@@ -2,21 +2,59 @@ package org.fastcreepermod.fastcreepermod;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 public class FastCreeperMod implements ModInitializer {
+
     public static final String MODID = "fastcreepermod";
 
     @Override
     public void onInitialize() {
         ModGameRules.registerRules();
         FastRandomCreeperHandler.registerEvents();
+        CreeperFeatureHandler.registerEvents();
+        ZombieFeatureHandler.registerEvents(); // Assuming you want to register this too!
+
+        // Register the timed block reward system
+        TimedBlockRewarder.register();
 
         // Message to ops when server starts
         ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStart);
+
+        // Use the new ServerMessageEvents.CHAT_MESSAGE event
+        ServerMessageEvents.CHAT_MESSAGE.register((message, sender, typeKey) -> {
+            String msg = message.getContent().getString().trim().toLowerCase();
+            // FIX: Use getWorld() instead of getServerWorld()
+            ServerWorld sw = sender.getWorld();
+
+            switch (msg) {
+                case "hy let's go to creeper level 1":
+                    sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER).set(true, sw.getServer());
+                    sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_CHARGED).set(false, sw.getServer());
+                    sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_ENDCRYSTAL).set(false, sw.getServer());
+                    sender.sendMessage(Text.literal("Creeper Level 1 enabled (normal)"), false);
+                    break;
+                case "hy let's go to creeper level 2":
+                    sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER).set(false, sw.getServer());
+                    sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_CHARGED).set(true, sw.getServer());
+                    sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_ENDCRYSTAL).set(false, sw.getServer());
+                    sender.sendMessage(Text.literal("Creeper Level 2 enabled (charged)"), false);
+                    break;
+                case "hy let's go to creeper level 3":
+                    sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER).set(false, sw.getServer());
+                    sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_CHARGED).set(false, sw.getServer());
+                    sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_ENDCRYSTAL).set(true, sw.getServer());
+                    sender.sendMessage(Text.literal("Creeper Level 3 enabled (End Crystal)"), false);
+                    break;
+                default:
+                    break;
+            }
+        });
     }
 
     private void onServerStart(MinecraftServer server) {
