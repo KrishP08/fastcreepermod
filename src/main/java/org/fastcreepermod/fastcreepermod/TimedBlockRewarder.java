@@ -7,7 +7,7 @@ public class TimedBlockRewarder {
     private static int tickCounter = 0;
 
     // 20 ticks = 1 second, so 20 * 300 = 300 seconds = 5 minutes
-    private static final int TICKS_PER_REWARD = 20 * 30; // Change 300 to your desired interval in seconds
+    private static final int TICKS_PER_REWARD = 20 * 50; // Change 300 to your desired interval in seconds
 
     public static void register() {
         ServerTickEvents.END_SERVER_TICK.register(server -> {

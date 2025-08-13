@@ -8,6 +8,7 @@ public class ModGameRules {
     public static GameRules.Key<GameRules.BooleanRule> FAST_RANDOM_CREEPER;
     public static GameRules.Key<GameRules.BooleanRule> FAST_RANDOM_CREEPER_CHARGED;
     public static GameRules.Key<GameRules.BooleanRule> FAST_RANDOM_CREEPER_ENDCRYSTAL;
+    public static GameRules.Key<GameRules.BooleanRule> zombiesEnhanced;
 
     public static void registerRules() {
         FAST_RANDOM_CREEPER = GameRuleRegistry.register(
@@ -18,6 +19,7 @@ public class ModGameRules {
         );
         FAST_RANDOM_CREEPER_ENDCRYSTAL = GameRuleRegistry.register(
                 "fastRandomCreeperEndCrystal", GameRules.Category.MOBS, GameRuleFactory.createBooleanRule(false)
-        );//
+        );//public static final GameRules.Key<GameRules.BooleanRule> ZOMBIES_ENHANCED =
+
     }
 }

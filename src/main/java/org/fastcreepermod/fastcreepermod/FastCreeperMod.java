@@ -2,27 +2,33 @@ package org.fastcreepermod.fastcreepermod;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.gamerule.v1.GameRuleFactory;
+import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.world.GameRules;
 
 public class FastCreeperMod implements ModInitializer {
 
     public static final String MODID = "fastcreepermod";
+    public static final GameRules.Key<GameRules.BooleanRule> ZOMBIES_ENHANCED =
+            GameRuleRegistry.register("zombiesEnhanced", // The name used in the /gamerule command
+                    GameRules.Category.MOBS, // The category it appears under in the game rule screen
+                    GameRuleFactory.createBooleanRule(true) // Creates a boolean (true/false) rule, defaulting to false
+            );
 
     @Override
     public void onInitialize() {
         ModGameRules.registerRules();
         FastRandomCreeperHandler.registerEvents();
-        CreeperFeatureHandler.registerEvents();
         ZombieFeatureHandler.registerEvents(); // Assuming you want to register this too!
-
         // Register the timed block reward system
         TimedBlockRewarder.register();
-
+        CropGrowthHandler.registerEvents();
         // Message to ops when server starts
         ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStart);
 

@@ -15,7 +15,10 @@
   "entrypoints": {
     "fabric-datagen": ["org.fastcreepermod.fastcreepermod.client.FastcreepermodDataGenerator"],
     "client": ["org.fastcreepermod.fastcreepermod.client.FastcreepermodClient"],
-    "main": ["org.fastcreepermod.fastcreepermod.FastCreeperMod"]
+    "main": ["org.fastcreepermod.fastcreepermod.FastCreeperMod"],
+    "data_pack": [
+      "org.fastcreepermod.fastcreepermod.FastCreeperMod"
+    ]
   },
 
   "mixins": [

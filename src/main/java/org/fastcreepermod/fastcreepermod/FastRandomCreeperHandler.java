@@ -9,13 +9,13 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import org.fastcreepermod.fastcreepermod.mixin.CreeperEntityAccessor;
-//
+
 import java.util.Random;
 
 public class FastRandomCreeperHandler {
@@ -42,13 +42,22 @@ public class FastRandomCreeperHandler {
             if (!(world instanceof ServerWorld sw)) return;
             if (!sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER).get()) return;
 
-            for (CreeperEntity creeper : sw.getEntitiesByClass(CreeperEntity.class, new Box(-300, -300, -300, 300, 300, 300), c -> true)) {
-                PlayerEntity nearest = sw.getClosestPlayer(creeper, 6);
-                if (nearest != null && !nearest.isCreative()) {
-                    creeper.setFuseSpeed(10);
-                    creeper.setTarget(nearest);
+            // --- THIS IS THE FIX ---
+            // Loop through each player in the world
+            for (PlayerEntity player : sw.getPlayers()) {
+                if (player.isCreative() || player.isSpectator()) continue;
+
+                // Find all creepers within a large box around that player
+                Box searchBox = new Box(player.getBlockPos()).expand(300);
+                for (CreeperEntity creeper : sw.getEntitiesByType(EntityType.CREEPER, searchBox, c -> true)) {
+                    // Check the distance between the creeper and this specific player
+                    if (creeper.distanceTo(player) < 6) {
+                        ((CreeperEntityAccessor) creeper).invokeIgnite(); // Ignite the creeper
+                        creeper.setTarget(player);
+                    }
                 }
             }
+            // --- END OF FIX ---
         });
     }
 
@@ -58,16 +67,16 @@ public class FastRandomCreeperHandler {
         tickCounter++;
         if (tickCounter % 6000 == 0 && waveMultiplier < 10) waveMultiplier++;
 
-        if (tickCounter >= 100) { // every 0.5s
+        if (tickCounter >= 100) { // every 5 seconds
             tickCounter = 0;
             int creepersPerPlayer = 2 * waveMultiplier;
             world.getPlayers().forEach(player -> {
                 if (player.isCreative()) return;
                 for (int i = 0; i < creepersPerPlayer; i++) {
                     BlockPos pos = player.getBlockPos().add(random.nextInt(18) - 9, 0, random.nextInt(18) - 9);
-                    if (world.isAir(pos)) {
+                    if (world.isAir(pos) && world.isAir(pos.up())) {
                         CreeperEntity creeper = new CreeperEntity(EntityType.CREEPER, world);
-                        creeper.refreshPositionAndAngles(pos, 0, 0);
+                        creeper.refreshPositionAndAngles(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, 0, 0);
                         baseCreeperBuff(world, creeper);
                         creeper.setTarget(player);
                         world.spawnEntity(creeper);
@@ -78,20 +87,23 @@ public class FastRandomCreeperHandler {
     }
 
     private static void baseCreeperBuff(ServerWorld world, CreeperEntity creeper) {
-        creeper.getAttributeInstance(EntityAttributes.MOVEMENT_SPEED).setBaseValue(FAST_SPEED);
-        creeper.getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(EXTRA_HEALTH);
-        creeper.setHealth((float) EXTRA_HEALTH);
-        creeper.setFuseSpeed(5);
-
+        // Set charged status FIRST
         if (world.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_CHARGED).get()) {
             creeper.getDataTracker().set(CreeperEntityAccessor.getChargedData(), true);
         } else if (random.nextFloat() < 0.3f) {
             creeper.getDataTracker().set(CreeperEntityAccessor.getChargedData(), true);
         }
 
+        // Now apply custom attributes AFTER the state change
+        creeper.getAttributeInstance(EntityAttributes.MOVEMENT_SPEED).setBaseValue(FAST_SPEED);
+        creeper.getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(EXTRA_HEALTH);
+        creeper.setHealth((float) EXTRA_HEALTH);
+        ((CreeperEntityAccessor) creeper).setFuseTime(5); // Directly set the fuse time
+
+        // Apply visual effects
         if (world.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_ENDCRYSTAL).get()) {
             creeper.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 200, 1, false, false));
-        } else if (world.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_CHARGED).get()) {
+        } else if (creeper.isCharged()) {
             creeper.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 200, 0, false, false));
         }
     }
