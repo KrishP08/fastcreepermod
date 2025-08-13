@@ -1,5 +1,0 @@
-{
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [ { "item": "fastcreepermod:bismith_block" } ],
-  "result": { "item": "fastcreepermod:bismith_ingot", "count": 9 }
-}
