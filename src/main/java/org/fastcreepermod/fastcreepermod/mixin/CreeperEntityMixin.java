@@ -24,7 +24,7 @@ public abstract class CreeperEntityMixin {
 
             float radius = this.explosionRadius;
             if (endCrystalRule) {
-                radius = 6.0f;
+                radius = 8.0f;
             } else if (chargedRule || self.isCharged()) {
                 radius = radius * 2.0f;
             }
