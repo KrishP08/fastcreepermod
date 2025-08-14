@@ -15,33 +15,43 @@ public class ZombieFeatureHandler {
 
     public static void registerEvents() {
         ServerEntityEvents.ENTITY_LOAD.register((entity, world) -> {
+            // Return early if we are on the client or the entity is not a ZombieEntity
             if (world.isClient() || !(entity instanceof ZombieEntity zombie)) {
                 return;
             }
 
-            // FIX: Correctly reference the game rule from your main mod class.
+            // Check the game rule to see if zombies should be enhanced
             if (world.getGameRules().getBoolean(FastCreeperMod.ZOMBIES_ENHANCED)) {
                 enhanceZombie(zombie);
             }
         });
     }
 
+    /**
+     * Enhances a zombie with custom attributes.
+     * @param zombie The ZombieEntity to modify.
+     */
     private static void enhanceZombie(ZombieEntity zombie) {
+        // Increase the zombie's base attack damage
         EntityAttributeInstance attackAttribute = zombie.getAttributeInstance(EntityAttributes.ATTACK_DAMAGE);
         if (attackAttribute != null) {
+            // Set the base damage to its current value plus our extra damage
             attackAttribute.setBaseValue(attackAttribute.getBaseValue() + EXTRA_DAMAGE);
         }
 
-        if (!zombie.isBaby()) {
-            zombie.setBaby(true);
-        }
+        // --- CHANGE ZOMBIE SIZE ---
+        // By setting the zombie to a baby, its size is reduced to half.
+        // This is the standard Minecraft way to change mob size without complex rendering changes.
+        // This also changes its hitbox and makes it faster.
+        zombie.setBaby(true);
 
+        // Add a permanent speed boost
         zombie.addStatusEffect(new StatusEffectInstance(
                 StatusEffects.SPEED,
-                StatusEffectInstance.INFINITE,
-                SPEED_AMPLIFIER,
-                false, // isAmbient
-                false  // showParticles
+                StatusEffectInstance.INFINITE, // Effect lasts forever
+                SPEED_AMPLIFIER,               // Speed I = +20% speed, Speed II = +40%, etc.
+                false,                         // isAmbient - less noticeable particles
+                false                          // showParticles - hides particles completely
         ));
     }
 }

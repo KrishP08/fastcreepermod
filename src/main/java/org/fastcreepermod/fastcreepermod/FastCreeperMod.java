@@ -39,19 +39,19 @@ public class FastCreeperMod implements ModInitializer {
             ServerWorld sw = sender.getWorld();
 
             switch (msg) {
-                case "hy let's go to creeper level 1":
+                case "go to creeper level 1":
                     sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER).set(true, sw.getServer());
                     sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_CHARGED).set(false, sw.getServer());
                     sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_ENDCRYSTAL).set(false, sw.getServer());
                     sender.sendMessage(Text.literal("Creeper Level 1 enabled (normal)"), false);
                     break;
-                case "hy let's go to creeper level 2":
+                case "go to creeper level 2":
                     sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER).set(false, sw.getServer());
                     sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_CHARGED).set(true, sw.getServer());
                     sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_ENDCRYSTAL).set(false, sw.getServer());
                     sender.sendMessage(Text.literal("Creeper Level 2 enabled (charged)"), false);
                     break;
-                case "hy let's go to creeper level 3":
+                case "go to creeper level 3":
                     sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER).set(false, sw.getServer());
                     sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_CHARGED).set(false, sw.getServer());
                     sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_ENDCRYSTAL).set(true, sw.getServer());

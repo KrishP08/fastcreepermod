@@ -42,22 +42,17 @@ public class FastRandomCreeperHandler {
             if (!(world instanceof ServerWorld sw)) return;
             if (!sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER).get()) return;
 
-            // --- THIS IS THE FIX ---
-            // Loop through each player in the world
             for (PlayerEntity player : sw.getPlayers()) {
                 if (player.isCreative() || player.isSpectator()) continue;
 
-                // Find all creepers within a large box around that player
                 Box searchBox = new Box(player.getBlockPos()).expand(300);
                 for (CreeperEntity creeper : sw.getEntitiesByType(EntityType.CREEPER, searchBox, c -> true)) {
-                    // Check the distance between the creeper and this specific player
                     if (creeper.distanceTo(player) < 6) {
                         ((CreeperEntityAccessor) creeper).invokeIgnite(); // Ignite the creeper
                         creeper.setTarget(player);
                     }
                 }
             }
-            // --- END OF FIX ---
         });
     }
 
@@ -98,7 +93,12 @@ public class FastRandomCreeperHandler {
         creeper.getAttributeInstance(EntityAttributes.MOVEMENT_SPEED).setBaseValue(FAST_SPEED);
         creeper.getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(EXTRA_HEALTH);
         creeper.setHealth((float) EXTRA_HEALTH);
-        ((CreeperEntityAccessor) creeper).setFuseTime(5); // Directly set the fuse time
+
+        // --- MODIFIED FUSE TIME ---
+        // Fuse time is in ticks (20 ticks = 1 second).
+        // A value from 0-40 gives a random fuse time between 0 and 2 seconds.
+        int fuseTicks = random.nextInt(41); // nextInt(41) generates a random number from 0 to 40.
+        ((CreeperEntityAccessor) creeper).setFuseTime(fuseTicks);
 
         // Apply visual effects
         if (world.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_ENDCRYSTAL).get()) {
