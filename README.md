@@ -22,10 +22,10 @@ An exhilarating Minecraft mod that makes survival more dynamic, challenging, and
 
 ## 🎮 Commands(This is Gamerule commands)
 | Command              | Description                                                        |
-|-------------------------------------|--------------------------------------------------------------------|
-| `/gamerule creeper level 1 true`    | Sets the creeper difficulty to **Level 1** (buffed creepers).      |
-| `/gamerule creeper level 2 true`    | Sets the creeper difficulty to **Level 2** (all creepers charged). |
-| `/gamerule creeper level 3 true`    | Sets the creeper difficulty to **Level 3** (charged + End Crystal-style explosions). |
+|-----------------------------------------------|--------------------------------------------------------------------|
+| `/gamerule fastRandomCreeper true`             | Sets the creeper difficulty to **Level 1** (buffed creepers).      |
+| `/gamerule fastRandomCreeperCharged true`       | Sets the creeper difficulty to **Level 2** (all creepers charged). |
+| `/gamerule fastRandomCreeperEndCrystal true`    | Sets the creeper difficulty to **Level 3** (charged + End Crystal-style explosions). |
 
 * **Creeper Levels(this is direct Chat Massage to enable gamerule)**:
     * `go to creeper level 1`
