@@ -27,7 +27,7 @@ An exhilarating Minecraft mod that makes survival more dynamic, challenging, and
 | `/gamerule creeper level 2 true`    | Sets the creeper difficulty to **Level 2** (all creepers charged). |
 | `/gamerule creeper level 3 true`    | Sets the creeper difficulty to **Level 3** (charged + End Crystal-style explosions). |
 
-* **Creeper Levels(this direct Chat Massage to enable gamerule)**:
+* **Creeper Levels(this is direct Chat Massage to enable gamerule)**:
     * `go to creeper level 1`
     * `go to creeper level 2`
     * `go to creeper level 3`
