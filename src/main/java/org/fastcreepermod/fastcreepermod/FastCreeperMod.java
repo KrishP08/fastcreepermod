@@ -12,14 +12,20 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.GameRules;
 
+import org.fastcreepermod.fastcreepermod.block.ModBlocks;
+import org.fastcreepermod.fastcreepermod.item.ModItems;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class FastCreeperMod implements ModInitializer {
 
-    public static final String MODID = "fastcreepermod";
+    public static final String MOD_ID = "fastcreepermod";
     public static final GameRules.Key<GameRules.BooleanRule> ZOMBIES_ENHANCED =
             GameRuleRegistry.register("zombiesEnhanced", // The name used in the /gamerule command
                     GameRules.Category.MOBS, // The category it appears under in the game rule screen
                     GameRuleFactory.createBooleanRule(true) // Creates a boolean (true/false) rule, defaulting to false
             );
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     @Override
     public void onInitialize() {
@@ -27,6 +33,8 @@ public class FastCreeperMod implements ModInitializer {
         FastRandomCreeperHandler.registerEvents();
         ZombieFeatureHandler.registerEvents(); // Assuming you want to register this too!
         // Register the timed block reward system
+        ModItems.registerModItems();
+        ModBlocks.registerModBlocks();
         TimedBlockRewarder.register();
         CropGrowthHandler.registerEvents();
         // Message to ops when server starts
@@ -56,6 +64,12 @@ public class FastCreeperMod implements ModInitializer {
                     sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_CHARGED).set(false, sw.getServer());
                     sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_ENDCRYSTAL).set(true, sw.getServer());
                     sender.sendMessage(Text.literal("Creeper Level 3 enabled (End Crystal)"), false);
+                    break;
+                case "Disable creeper rules":
+                    sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER).set(false, sw.getServer());
+                    sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_CHARGED).set(false, sw.getServer());
+                    sw.getGameRules().get(ModGameRules.FAST_RANDOM_CREEPER_ENDCRYSTAL).set(false, sw.getServer());
+                    sender.sendMessage(Text.literal("All Creeper rule are disable"), false);
                     break;
                 default:
                     break;
